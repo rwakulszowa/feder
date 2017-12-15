@@ -4,10 +4,10 @@ import logging
 import os
 import uuid
 
-import claw
+import talon
 from atom.models import AttachmentBase
 from cached_property import cached_property
-from claw import quotations
+from talon import quotations
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files import File
@@ -28,7 +28,9 @@ from feder.cases.models import Case
 from feder.institutions.models import Institution
 from .utils import email_wrapper, normalize_msg_id
 
-claw.init()
+from builtins import str
+
+talon.init()
 
 logger = logging.getLogger(__name__)
 
@@ -122,10 +124,10 @@ class Letter(TimeStampedModel):
         return _("(no subject)")
 
     def __str__(self):
-        return unicode(self.get_title())
+        return str(self.get_title())
 
     def __unicode__(self):
-        return unicode(self.get_title())
+        return str(self.get_title())
 
     def get_absolute_url(self):
         return reverse('letters:details', kwargs={'pk': self.pk})
