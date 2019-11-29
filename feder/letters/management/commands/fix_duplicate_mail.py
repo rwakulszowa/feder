@@ -17,16 +17,24 @@ class Command(BaseCommand):
             "--delete", help="Confirm deletion of email", action="store_true"
         )
 
+    def write_level(self, level, content, *args):
+        self.stdout.write("{}{}".format("\t" * level, content.format(*args)))
+
     def handle(self, *args, **options):
         monitoring = Monitoring.objects.get(pk=options["monitoring_pk"])
-        for case in monitoring.case_set.all():
+        case_count = monitoring.case_set.count()
+        removed_count = 0
+        for i, case in enumerate(monitoring.case_set.iterator()):
             ids = set()
+            self.write_level(
+                0, "Processing case: {} (progress: {:.2f}%)", case.pk, i / case_count * 100
+            )
             for letter in (
                 Letter.objects.filter(record__case=case.pk).is_incoming().all()
             ):
-                self.stdout.write("Processing letter: {}".format(letter.pk))
+                self.write_level(1, "Processing letter: {}", letter.pk)
                 if not letter.eml:
-                    self.stdout.write("Skipping {} due missing eml.".format(letter.pk))
+                    self.write_level(2, "Skipping {} due missing eml.", letter.pk)
                     continue
                 content = letter.eml.file.read()
                 fp = BytesIO(content)
@@ -35,22 +43,20 @@ class Command(BaseCommand):
                 msg = email.message_from_binary_file(fp)
                 msg_id = msg.get("Message-ID")
                 if not msg_id:
-                    self.stdout.write(
-                        "Skipping {} due missing 'Message-ID'.".format(letter.pk)
+                    self.write_level(
+                        2, "Skipping {} due missing 'Message-ID'.", letter.pk
                     )
                     continue
                 if msg_id not in ids:
-                    self.stdout.write(
-                        "Skipping {} due unique 'Message-ID': {}".format(
-                            letter.pk, msg_id
-                        )
+                    self.write_level(
+                        2, "Skipping {} due unique 'Message-ID': {}", letter.pk, msg_id
                     )
                     ids.add(msg_id)
                     continue
-                self.stdout.write(
-                    "Removing {} due duplicated 'Message-ID': {}".format(
-                        letter.pk, msg_id
-                    )
+                self.write_level(
+                    2, "Removing {} due duplicated 'Message-ID': {}", letter.pk, msg_id
                 )
+                removed_count+=1
                 if options["delete"]:
                     letter.delete()
+        self.write_level(0, "Removed total {} letters", removed_count)
