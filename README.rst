@@ -24,21 +24,17 @@ Wszystkie sprawdzenia kodu statycznego można uruchamiać za pomocą [pre-commit
 także weryfikowane w środowisku [GitHub Actions](https://github.com/watchdogpolska/feder/actions), przy każdej
 propozycji zmian zawartości repozytorium.
 
-W celu instalacji narzędzia do statycznej kontroli kodu, należy wykonać:
+W celu instalacji narzędzia do statycznej kontroli kodu, należy wykonać::
 
-```
-pip install -r requirements/dev.txt
-```
+  pip install -r requirements/dev.txt
 
-W celu wykonania kontroli statycznej kodu, należy wykonać:
+W celu wykonania kontroli statycznej kodu, należy wykonać::
 
-```bash
-git add .
-make lint
-```
+  git add .
+  make lint
 
-Aby włączyć automatyczne sprawdzanie kodu przed stworzeniem zmiany (`commit`), należy wykonać:
 
-```bash
-pre-commit install
-```
+Aby włączyć automatyczne sprawdzanie kodu przed stworzeniem zmiany (`commit`), należy wykonać::
+
+  pre-commit install
+
